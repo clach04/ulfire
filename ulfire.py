@@ -30,7 +30,6 @@ THE SOFTWARE.
 
 import email.utils
 import json
-import lazylights
 import select
 import socket
 import struct
@@ -38,6 +37,7 @@ import sys
 import time
 import uuid
 
+import lazylights
 from ouimeaux.environment import Environment
 
 # This XML is the minimum needed to define one of our virtual Hues
