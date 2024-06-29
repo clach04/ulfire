@@ -112,10 +112,10 @@ HUE_SETUP_XML = """<?xml version="1.0" encoding="UTF-8" ?>
 
 DEBUG = False
 
-def dbg(msg):
+def dbg(msg):  # FIXME use real logging library
     global DEBUG
     if DEBUG:
-        print msg
+        print(msg)
         sys.stdout.flush()
 
 
@@ -410,7 +410,7 @@ class upnp_broadcast_responder(object):
 
             try:
                 self.ssock.bind(('', self.port))
-            except Exception, e:
+            except Exception as e:
                 dbg("WARNING: Failed to bind %s:%d: %s", (self.ip, self.port,
                                                           e))
                 ok = False
@@ -418,12 +418,12 @@ class upnp_broadcast_responder(object):
             try:
                 self.ssock.setsockopt(socket.IPPROTO_IP,
                                       socket.IP_ADD_MEMBERSHIP, self.mreq)
-            except Exception, e:
-                dbg('WARNING: Failed to join multicast group:', e)
+            except Exception as e:
+                dbg('WARNING: Failed to join multicast group:', e)  # FIXME could be log.error('Error demo', exc_info=1)  # include traceback
                 ok = False
 
-        except Exception, e:
-            dbg("Failed to initialize UPnP sockets:", e)
+        except Exception as e:
+            dbg("Failed to initialize UPnP sockets:", e)  # FIXME could be log.error('Error demo', exc_info=1)  # include traceback
             return False
         if ok:
             dbg("Listening for UPnP broadcasts")
@@ -461,8 +461,8 @@ class upnp_broadcast_responder(object):
                 return self.ssock.recvfrom(size)
             else:
                 return False, False
-        except Exception, e:
-            dbg(e)
+        except Exception as e:
+            dbg(e)  # FIXME could be log.error('Error demo', exc_info=1)  # include traceback
             return False, False
 
     def add_device(self, device):
