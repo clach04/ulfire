@@ -55,7 +55,10 @@ def fake_module(name):
 try:
     import lazylights
 except ImportError:
-    lazylights = fake_module('lazylights')
+    try:
+        import fake_lazylights as lazylights
+    except ImportError:
+        lazylights = fake_module('lazylights')
 
 try:
     import ouimeaux
@@ -111,6 +114,7 @@ HUE_SETUP_XML = """<?xml version="1.0" encoding="UTF-8" ?>
 </root>"""
 
 DEBUG = False
+DEBUG = True
 
 def dbg(msg):  # FIXME use real logging library
     global DEBUG
@@ -181,6 +185,8 @@ class upnp_device(object):
         
 
     def __init__(self, listener, poller, port, root_url, server_version, persistent_uuid, protocol, other_headers = None, ip_address = None):
+        dbg('upnp_device init %r' % ((listener, poller, port, root_url, server_version, persistent_uuid, protocol, other_headers, ip_address),))
+        dbg('upnp_device init root_url %r' % ((root_url, ),))
         self.listener = listener
         self.poller = poller
         self.port = port
@@ -317,18 +323,21 @@ class fauxhue(upnp_device):
     def get_name(self):
         return self.name
 
-    def send(self, msg_socket, data):
+    def send(self, msg_socket, data, content_type='application/json'):
+        # FIXME does not handle clients that disconnect prematurely
+        # FIXME respond to / root requests, include html with link to /api/username/lights ?
+        dbg('send %r' % (data,))
         date_str = email.utils.formatdate(timeval=None, localtime=False, usegmt=True)
         message = ("HTTP/1.1 200 OK\r\n"
                    "CONTENT-LENGTH: %d\r\n"
-                   "CONTENT-TYPE: text/xml\r\n"
+                   "CONTENT-TYPE: %s\r\n"
                    "DATE: %s\r\n"
                    "LAST-MODIFIED: Sat, 01 Jan 2000 00:01:15 GMT\r\n"
                    "SERVER: Unspecified, UPnP/1.0, Unspecified\r\n"
                    "X-User-Agent: redsonic\r\n"
                    "CONNECTION: close\r\n"
                    "\r\n"
-                   "%s" % (len(data), date_str, data))
+                   "%s" % (len(data), content_type, date_str, data))
         msg_socket.send(message)
 
     def handle_request(self, data, sender, msg_socket):
@@ -341,7 +350,7 @@ class fauxhue(upnp_device):
             if requestdata[1] == 'description.xml':
                 dbg("Responding to description.xml for %s" % self.name)
                 xml = HUE_SETUP_XML % {'host' : self.ip_address, 'port' : self.port}
-                self.send(msg_socket, xml)
+                self.send(msg_socket, xml, content_type='text/xml')
             elif len(requestdata) == 4 and requestdata[3] == 'lights':
                 data = json.dumps(self.lights)
                 self.send(msg_socket, data)
