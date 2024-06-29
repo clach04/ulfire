@@ -36,9 +36,45 @@ import struct
 import sys
 import time
 import uuid
+import warnings
 
-import lazylights
-from ouimeaux.environment import Environment
+
+def fake_module(name):
+    # Fail with a clear message (possibly at an unexpected time)
+    class MissingModule(object):
+        def __getattr__(self, attr):
+            raise ImportError('No module named %s' % name)
+
+        def __bool__(self):  # Not sure __nonzero__ check was working in py3
+            # if checks on this will fail
+            return False
+        __nonzero__ = __bool__
+
+    return MissingModule()
+
+try:
+    import lazylights
+except ImportError:
+    lazylights = fake_module('lazylights')
+
+try:
+    import ouimeaux
+    import ouimeaux.environment
+    from ouimeaux.environment import Environment
+except ImportError:
+    ouimeaux = fake_module('ouimeaux')
+    class FakeEnvironment:
+        def start(self):
+            warnings.warn('ouimeaux missing, no WeMo support')
+            pass  # NOOP
+        def list_bridges(self):
+            return ()  # NOOP
+        def discover(self, timeout):
+            pass  # NOOP - timeout ignored
+
+    Environment = FakeEnvironment
+
+
 
 # This XML is the minimum needed to define one of our virtual Hues
 # to the Amazon Echo
@@ -494,7 +530,11 @@ p.add(u)
 
 hue = None
 
-bulbs = lazylights.find_bulbs(timeout=1)
+if lazylights:
+    bulbs = lazylights.find_bulbs(timeout=1)
+else:
+    warnings.warn('lazylights missing, no Lifx support')
+    bulbs = []
 if len(bulbs) > 0:
     hue = fauxhue("Fauxhue", u, p, None, 0)
     bulbstate = lazylights.get_state(bulbs)
