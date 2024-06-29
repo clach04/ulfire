@@ -479,6 +479,23 @@ class upnp_broadcast_responder(object):
         dbg("UPnP broadcast listener: new device registered")
 
 
+# FIXME generic class, which wemo_api_handler and lifx_api_handler inherit from
+# FIXME pep8 fix wemo_api_handler and lifx_api_handler
+# FIXME no get state API
+
+class DebugPrintAPIhandler(object):
+    def on(self, data):
+        print('ON %r' % (data,))
+        return True
+
+    def off(self, data):
+        print('OFF %r' % (data,))
+        return True
+
+    def dim(self, data, value):
+        print('DIM %r' % (data,))
+        return True
+
 # Wemo Link handler for the Philips Hue compatibility. The fauxhue class
 # expects handlers to be instances of objects that have on(), off() and dim()
 # methods that return True on success and False otherwise.
@@ -537,7 +554,7 @@ u.init_socket()
 # when a broadcast is received.
 p.add(u)
 
-hue = None
+hue = None  # FIXME init this once and only once here!
 
 if lazylights:
     bulbs = lazylights.find_bulbs(timeout=1)
@@ -567,6 +584,18 @@ for bridgename in env.list_bridges():
                      brightness=state['dim'], private=lightdata,
                      action_handler = wemo_api_handler())
 
+# fauxmo - like hack - static config
+fake_switches = (
+    #(name, ),
+    ('fake switch 1', 'fake switch 1', ),
+)
+if not hue:
+    hue = fauxhue("Fauxhue", u, p, None, 0)
+for fake_switch in fake_switches:
+    print('processing fake_switch %r', (fake_switch,))
+    switch_id, switch_name = fake_switch
+    #hue.add_bulb(switch_name, state=bool(switch_state), brightness=switch_dim, private=switch_data, action_handler=DebugPrintAPIhandler())
+    hue.add_bulb(switch_name, action_handler=DebugPrintAPIhandler())
 
 dbg("Entering main loop\n")
 

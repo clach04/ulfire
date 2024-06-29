@@ -3,7 +3,7 @@
 Home page https://github.com/clach04/ulfire
 a fork of https://github.com/mjg59/ulfire
 
-fauxhue / Ulfire is a simple Python 3 and 2 application that detects and controls LIFX and
+fauxhue / Ulfire is a simple Python 2 (py3 TODO) application that detects and controls LIFX and
 Belkin WeMo Link LED bulbs by exporting a sufficient subset of the Philips
 Hue API to convince the Amazon Echo that it's speaking to a real Hue.
 
