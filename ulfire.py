@@ -225,7 +225,7 @@ class upnp_device(object):
                 self.poller.remove(self, fileno)
                 del(self.client_sockets[fileno])
             else:
-                self.handle_request(data, sender, self.client_sockets[fileno])
+                self.handle_request(data, sender, self.client_sockets[fileno])  # FIXME does not handle json read/decode
 
     def handle_request(self, data, sender, socket):
         pass
@@ -355,13 +355,15 @@ class fauxhue(upnp_device):
                 data = json.dumps(self.lights)
                 self.send(msg_socket, data)
             elif len(requestdata) >= 5 and requestdata[3] == 'lights':
-                data = json.dumps(self.lights[requestdata[4]])
+                data = json.dumps(self.lights[requestdata[4]])  # FIXME fails if unknown light
                 self.send(msg_socket, data)
         elif tokens[0] == 'PUT':
             if len(requestdata) >= 5 and requestdata[3] == 'lights':
                 lightnum = requestdata[4]
-                submission = data.split('\n')[6]
-                command = json.loads(submission)
+                dbg('handle_request raw payload %r' % (data,))  # seeing: 'PUT /api/nouser/lights/1/state HTTP/1.1\r\nHost: XXX.XXX.XXX.XXX:PPPPP\r\nUser-Agent: curl/7.68.0\r\nAccept: application/json\r\nContent-Length: 12\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n{"on": true}'
+                submission = data.split('\n')[6]  # FIXME WTF?
+                dbg('handle_request payload %r' % (submission,))  # seeing '\r'
+                command = json.loads(submission)  # FIXME does not handle json
                 responses = []
                 for setting in command.keys():
                     value = command[setting]

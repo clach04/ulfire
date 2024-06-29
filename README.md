@@ -12,6 +12,29 @@ WeMo Link lights.
 
 Both LIFX and WeMo support is optional.
 
+## Problems
+
+  * no Python 3 (byte) support
+  * does not respond to discovery requests from miranda nor https://github.com/Overboard/discoverhue.git
+  * does not respond to json payload (from cURL)
+  * does not respond to config url
+
+#### cURL Philips Hue samples
+
+    echo IP needs to include colon port if NOT using port 80
+    export USERNAME=nouser
+    export IP=127.0.0.0:80
+    export LIGHTNUM=1  # pick the first one, what ever it maybe
+    curl -v http://${IP}/description.xml
+    curl -v http://${IP}/api/${USERNAME}/lights
+    curl -v http://${IP}/api/${USERNAME}/config
+
+    curl -v http://${IP}/api/${USERNAME}/lights/${LIGHTNUM}
+    curl -s -H "Accept: application/json" -X PUT --data "{\"on\": true}"  http://${IP}/api/${USERNAME}/lights/${LIGHTNUM}/state
+    curl -s -H "Accept: application/json" -X PUT --data "{\"on\": false}" http://${IP}/api/${USERNAME}/lights/${LIGHTNUM}/state
+
+
+
 Requirements
 ------------
 
