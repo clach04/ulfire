@@ -56,6 +56,7 @@ try:
     import lazylights
 except ImportError:
     try:
+        #raise ImportError()  # debug
         import fake_lazylights as lazylights
     except ImportError:
         lazylights = fake_module('lazylights')
@@ -488,6 +489,14 @@ class upnp_broadcast_responder(object):
 # FIXME no get state API
 
 class DebugPrintAPIhandler(object):
+    """ Current behavior/output
+OFF None
+send '[{"success": {"/lights/1/state/on": false}}]'
+
+ON None
+send '[{"success": {"/lights/1/state/on": true}}]'
+
+    """
     def on(self, data):
         print('ON %r' % (data,))
         return True
