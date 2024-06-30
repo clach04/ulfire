@@ -361,7 +361,9 @@ class fauxhue(upnp_device):
             if len(requestdata) >= 5 and requestdata[3] == 'lights':
                 lightnum = requestdata[4]
                 dbg('handle_request raw payload %r' % (data,))  # seeing: 'PUT /api/nouser/lights/1/state HTTP/1.1\r\nHost: XXX.XXX.XXX.XXX:PPPPP\r\nUser-Agent: curl/7.68.0\r\nAccept: application/json\r\nContent-Length: 12\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n{"on": true}'
-                submission = data.split('\n')[6]  # FIXME WTF?
+                #import pdb ; pdb.set_trace()
+                #submission = data.split('\n')[6]  # FIXME WTF?
+                submission = data.split('\n')[-1]  # FIXME WTF? - sucks less than previous...
                 dbg('handle_request payload %r' % (submission,))  # seeing '\r'
                 command = json.loads(submission)  # FIXME does not handle json
                 responses = []
